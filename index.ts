@@ -51,7 +51,7 @@ ch1Rankings = ch1Rankings.map((obj: any) => {
     return { teamId, points };
 });
 
-ch1Rankings.forEach((value, index) => {
+ch1Rankings.forEach((value: any, index: any) => {
     value.rank = index + 1;
 });
 
