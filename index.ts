@@ -3,11 +3,11 @@ import connectionPool from "./src/db";
 import ObjectsToCsv from "objects-to-csv";
 dotenv.config();
 
-const points = [25, 18, 15, 12, 10, 8, 6, 4, 3, 2, 1]; // These numbers come from F1 (or maybe not)
+const points = [25, 18, 15, 12, 10, 8, 6, 4, 3, 2]; // These numbers come from F1 (or maybe not)
 
-async function getRanking(chapterId: string) {
+async function getRanking(chapterId: number) {
   let conn = await connectionPool.getConnection();
-  let results = await conn.query("SELECT * FROM Submits WHERE chapterId = ?", [
+  let results = await conn.query("SELECT * FROM Submits WHERE chapterId = ? ORDER BY date", [
     chapterId,
   ]);
   let peopleWhoDidntSubmitShameOnThem = await conn.query(
@@ -19,31 +19,31 @@ async function getRanking(chapterId: string) {
     value.points = 0;
   });
 
-  results = [].concat(results, peopleWhoDidntSubmitShameOnThem);
   results.forEach((value: any, index: number) => {
     value.points = index < points.length && value.date != 0 ? points[index] : 1;
   });
+  results = [].concat(results, peopleWhoDidntSubmitShameOnThem);
 
-  results.forEach((value: any) => (value.points -= 1));
+  //results.forEach((value: any) => (value.points -= 1));
   return results;
 }
 
-let ch1Rankings = await getRanking("1");
-let ch2Rankings = await getRanking("2");
-let ch3Rankings = await getRanking("3");
+let ch1Rankings = await getRanking(1);
+let ch2Rankings = await getRanking(2);
+let ch3Rankings = await getRanking(3);
+console.log(ch3Rankings);
 
 
 // Now Ch1ranking becomes the ranking as a whole
 ch1Rankings.forEach((v: any) => {
   v.points =
     v.points +
-    ch2Rankings.filter((r: any) => r.teamId == v.teamId)[0].points +
-    ch3Rankings.filter((r: any) => r.teamId == v.teamId)[0].points;
+    ch2Rankings.filter((r: any) => r.teamId.trim() == v.teamId.trim())[0].points +
+   ch3Rankings.filter((r: any) => r.teamId.trim()== v.teamId.trim())[0].points;
 });
 
 
-
-ch1Rankings.sort((a: any, b: any) => b.points - a.points);
+ch1Rankings.sort((a, b) => b.points - a.points);
 
 // Remove the unnecessary attributes from the objects
 ch1Rankings = ch1Rankings.map((obj: any) => {
@@ -61,7 +61,7 @@ await (async () => {
     await csv.toDisk("out/test.csv", {
         append: false,
     });
-    console.log(await csv.toString());
 })();
 
 
+console.log("Done !"); 
