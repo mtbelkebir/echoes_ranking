@@ -24,7 +24,6 @@ async function getRanking(chapterId: number) {
   });
   results = [].concat(results, peopleWhoDidntSubmitShameOnThem);
 
-  //results.forEach((value: any) => (value.points -= 1));
   return results;
 }
 
@@ -43,7 +42,7 @@ ch1Rankings.forEach((v: any) => {
 });
 
 
-ch1Rankings.sort((a, b) => b.points - a.points);
+ch1Rankings.sort((a: any, b: any) => b.points - a.points);
 
 // Remove the unnecessary attributes from the objects
 ch1Rankings = ch1Rankings.map((obj: any) => {
